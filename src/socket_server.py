@@ -3,12 +3,12 @@ from  pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.parse
 
-PUBLIC_PATH = Path(__file__).resolve().parent / 'public'
+PUBLIC_PATH = Path(__file__).resolve().parents[1] / 'public'
 
 class HttpHandler(BaseHTTPRequestHandler):
     def do_POST(self):
-        pr_url = urllib.parse.urlparse(self.path)
-        if pr_url.path != '/message':
+        self.__parse_path()
+        if self.parsed_path != '/message':
             self.send_html_file('error.html', 404)
             return
         data = self.rfile.read(int(self.headers['Content-Length']))
@@ -22,13 +22,14 @@ class HttpHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        pr_url = urllib.parse.urlparse(self.path)
-        if pr_url.path == '/':
+        self.__parse_path()
+        if self.parsed_path == '/' or self.parsed_path == '/index':
             self.send_html_file('index.html')
-        elif pr_url.path == '/contact':
+        elif self.parsed_path == '/contact':
             self.send_html_file('contact.html')
         else:
-            if PUBLIC_PATH.joinpath(pr_url.path[1:]).exists():
+            static_path = self.__get_static_path()
+            if static_path.exists() and not self.parsed_path.endswith('.html'):
                 self.send_static()
             else:
                 self.send_html_file('error.html', 404)
@@ -48,8 +49,14 @@ class HttpHandler(BaseHTTPRequestHandler):
         else:
             self.send_header("Content-type", 'text/plain')
         self.end_headers()
-        with open(f'.{self.path}', 'rb') as file:
+
+        with open(self.__get_static_path(), 'rb') as file:
             self.wfile.write(file.read())
+
+    def __parse_path(self):
+        self.parsed_path = urllib.parse.urlparse(self.path).path
+    def __get_static_path(self):
+        return PUBLIC_PATH.joinpath(self.parsed_path[1:])
 
 
 def run(server_class=HTTPServer, handler_class=HttpHandler):
