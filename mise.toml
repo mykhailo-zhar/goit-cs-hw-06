@@ -5,6 +5,9 @@ min_version = "2024.9.5"
 PROJECT_NAME = "{{ config_root | basename }}"
 SOURCEDIR    = "docs/source"
 BUILDDIR     = "docs/build"
+HTTP_SERVER_PORT = 3000
+SOCKET_MESSAGE_PORT = 5000
+SOCKET_MESSAGE_HOST = "127.0.0.1"
 
 # Automatic virtualenv activation
 _.python.venv = { path = ".venv" }
