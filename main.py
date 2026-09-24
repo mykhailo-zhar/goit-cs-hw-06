@@ -1,6 +1,7 @@
-def main():
-    print("Hello from TODO: replace goit-pycore-template!")
+from src.socket_server import run
 
+def main():
+    run()
 
 if __name__ == "__main__":
     main()
