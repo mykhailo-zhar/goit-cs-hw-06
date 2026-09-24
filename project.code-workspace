@@ -1,0 +1,43 @@
+{
+  "folders": [
+    {
+      "path": ".",
+    },
+  ],
+  "settings": {
+    "python.testing.pytestArgs": ["tests"],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "autoDocstring.docstringFormat": "google",
+    "autoDocstring.generateDocstringOnEnter": true,
+    "autoDocstring.guessTypes": true,
+    "autoDocstring.startOnNewLine": true,
+    "[python]": {
+      "editor.tabSize": 4,
+      "editor.insertSpaces": true,
+      "editor.defaultFormatter": "charliermarsh.ruff",
+      "editor.formatOnSave": true,
+      "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit",
+      },
+    },
+    "autoDocstring.includeName": false,
+  },
+  "extensions": {
+    "recommendations": [
+      "charliermarsh.ruff",
+      "ms-python.python",
+      "ms-python.debugpy",
+      "anysphere.cursorpyright",
+      "esbenp.prettier-vscode",
+      "GoIT.vscode-activity",
+      "njpwerner.autodocstring",
+      "GitHub.vscode-pull-request-github",
+      "PKief.material-icon-theme",
+      "hverlin.mise-vscode",
+      "tombi-toml.tombi",
+      "Gruntfuggly.todo-tree",
+    ],
+  },
+}

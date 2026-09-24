@@ -1,0 +1,65 @@
+min_version = "2024.9.5"
+
+[env]
+# Use the project name derived from the current directory
+PROJECT_NAME = "{{ config_root | basename }}"
+SOURCEDIR    = "docs/source"
+BUILDDIR     = "docs/build"
+
+# Automatic virtualenv activation
+_.python.venv = { path = ".venv" }
+
+[settings]
+python.uv_venv_auto = "create|source"
+
+[tools]
+python = "{{ get_env(name='PYTHON_VERSION', default='3.12') }}"
+ruff = "latest"
+uv = "latest"
+
+[tasks.install-dependencies]
+description = "Install dependencies"
+alias = "id"
+run = "uv sync"
+
+[tasks.install]
+description = "Install the application"
+run = "uv add {{ usage.package }}"
+usage = '''
+arg "<package>" help="Package to install"
+'''
+
+[tasks.test]
+description = "Run tests"
+run = "pytest tests/"
+
+[tasks.lint]
+description = "Lint the code"
+run = "ruff check ."
+
+[tasks.info]
+description = "Print project information"
+run = '''
+echo "Project: $PROJECT_NAME"
+echo "Virtual Environment: $VIRTUAL_ENV"
+'''
+
+[tasks.generate-docs]
+alias = "gd"
+description = "Generate reST files for the project "
+run = "sphinx-apidoc -o docs/source src/ && sphinx-apidoc -o docs/source tests/"
+
+[tasks.build-docs]
+alias = "bd"
+description = "Build HTML documentation from the reST files"
+run = "make html"
+
+[tasks.pre-commit-install]
+description = "Install pre-commit hooks"
+run = "pre-commit install"
+alias = "pci"
+
+[tasks.pre-commit-run]
+description = "Run pre-commit hooks"
+run = "pre-commit run --all-files"  
+alias = "pcr"
