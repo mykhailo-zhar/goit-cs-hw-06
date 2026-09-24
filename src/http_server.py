@@ -8,6 +8,11 @@ from pathlib import Path
 
 PUBLIC_PATH = Path(__file__).resolve().parents[1] / "public"
 
+SERVER = (
+    os.environ.get("SOCKET_MESSAGE_HOST", "127.0.0.1"),
+    int(os.environ.get("SOCKET_MESSAGE_PORT", "5000")),
+)
+
 
 class HttpHandler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -20,14 +25,10 @@ class HttpHandler(BaseHTTPRequestHandler):
 
     def send_through_socket(self, data):
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        server = (
-            os.environ.get("SOCKET_MESSAGE_HOST", "127.0.0.1"),
-            int(os.environ.get("SOCKET_MESSAGE_PORT", "5000")),
-        )
 
-        self.log_message("Sending data to socket %d on server %s", server[1], server[0])
+        self.log_message("Sending data to socket %d on server %s", SERVER[1], SERVER[0])
 
-        sock.sendto(data, server)
+        sock.sendto(data, SERVER)
         sock.close()
 
     def send_html_file(self, filename, status=200):
@@ -93,9 +94,23 @@ class HttpHandler(BaseHTTPRequestHandler):
         return PUBLIC_PATH.joinpath(self.parsed_path[1:])
 
 
+def end_socket_server():
+    if not os.environ.get("SOCKET_SERVER_DEPENDANT") and not os.environ.get(
+        "CONTROL_SOCKET_SERVER"
+    ):
+        return
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+    print("Ending socket server on socket %d with address %s", SERVER[1], SERVER[0])
+
+    sock.sendto(b"END", SERVER)
+    sock.close()
+
+
 def run(server_class=HTTPServer, handler_class=HttpHandler):
     server_address = (
-        "",
+        os.environ.get("HTTP_SERVER_HOST", ""),
         int(os.environ.get("HTTP_SERVER_PORT", "3000")),
     )
     http = server_class(server_address, handler_class)
@@ -103,6 +118,8 @@ def run(server_class=HTTPServer, handler_class=HttpHandler):
         http.serve_forever()
     except KeyboardInterrupt:
         http.server_close()
+    finally:
+        end_socket_server()
 
 
 if __name__ == "__main__":
