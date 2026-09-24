@@ -1,8 +1,9 @@
 import mimetypes
-import pathlib
+from  pathlib import Path
 from http.server import HTTPServer, BaseHTTPRequestHandler
 import urllib.parse
 
+PUBLIC_PATH = Path(__file__).resolve().parent / 'public'
 
 class HttpHandler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -27,7 +28,7 @@ class HttpHandler(BaseHTTPRequestHandler):
         elif pr_url.path == '/contact':
             self.send_html_file('contact.html')
         else:
-            if pathlib.Path().joinpath(pr_url.path[1:]).exists():
+            if PUBLIC_PATH.joinpath(pr_url.path[1:]).exists():
                 self.send_static()
             else:
                 self.send_html_file('error.html', 404)
@@ -36,7 +37,7 @@ class HttpHandler(BaseHTTPRequestHandler):
         self.send_response(status)
         self.send_header('Content-type', 'text/html')
         self.end_headers()
-        with open(filename, 'rb') as fd:
+        with open(PUBLIC_PATH / filename, 'rb') as fd:
             self.wfile.write(fd.read())
 
     def send_static(self):
