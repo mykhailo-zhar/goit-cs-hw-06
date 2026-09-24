@@ -16,8 +16,10 @@ if __name__ == "__main__":
     logger = logging.getLogger()
     handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+
+    formatter = logging.Formatter("%(levelname)s\t%(name)s\t%(message)s")
     handler.setFormatter(formatter)
+
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 

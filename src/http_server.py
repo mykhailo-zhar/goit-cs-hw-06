@@ -95,9 +95,7 @@ class HttpHandler(BaseHTTPRequestHandler):
 
 
 def end_socket_server():
-    if not os.environ.get("SOCKET_SERVER_DEPENDANT") and not os.environ.get(
-        "CONTROL_SOCKET_SERVER"
-    ):
+    if not os.environ.get("CONTROL_SOCKET_SERVER"):
         return
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
