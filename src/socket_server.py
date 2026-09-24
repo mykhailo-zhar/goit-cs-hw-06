@@ -85,7 +85,7 @@ def print_found_message(db: Database, id):
 def run_server(ip, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server = ip, port
-    logger.info("Starting server: host: %s on socket %d", ip, port)
+    logger.info("Starting server. Host: %s on socket %d", ip, port)
     sock.bind(server)
     con = create_mongo_connection()
 
@@ -94,13 +94,16 @@ def run_server(ip, port):
         while True:
             data, address = sock.recvfrom(1024)
             result = data.decode()
+
             if result == "END":
                 logger.info("Stopping server due to http server request")
                 break
+
             data_dict = json.loads(result)
             logger.info(f"Received data: {data_dict} from: {address}")
 
             id = create_message(con, data_dict)
+
             tr = Thread(target=print_found_message, args=(con, id))
             tr.start()
             threads.append(tr)
@@ -116,8 +119,10 @@ def run_server(ip, port):
 if __name__ == "__main__":
     handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
-    formatter = logging.Formatter("%(levelname)s:%(name)s:%(message)s")
+
+    formatter = logging.Formatter("%(levelname)s\t\t%(name)s\t\t%(message)s")
     handler.setFormatter(formatter)
+
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
 
