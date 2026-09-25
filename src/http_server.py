@@ -16,14 +16,20 @@ SERVER = (
 
 class HttpHandler(BaseHTTPRequestHandler):
     def do_POST(self):
+        """Handle a POST request by routing the parsed path."""
         self.__parse_path()
         self.__POST_routes()
 
     def do_GET(self):
+        """Handle a GET request by routing the parsed path."""
         self.__parse_path()
         self.__GET_routes()
 
     def send_through_socket(self, data):
+        """Send bytes to the UDP socket server.
+
+        :param data: payload to forward, usually JSON-encoded form fields
+        """
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         self.log_message("Sending data to socket %d on server %s", SERVER[1], SERVER[0])
@@ -32,6 +38,11 @@ class HttpHandler(BaseHTTPRequestHandler):
         sock.close()
 
     def send_html_file(self, filename, status=200):
+        """Write an HTML file from the public directory as the response.
+
+        :param filename: file name inside the public directory
+        :param status: HTTP status code to send
+        """
         self.send_response(status)
         self.send_header("Content-type", "text/html")
         self.end_headers()
@@ -39,6 +50,7 @@ class HttpHandler(BaseHTTPRequestHandler):
             self.wfile.write(fd.read())
 
     def send_static(self):
+        """Write a static file from the public directory with a guessed content type."""
         self.send_response(200)
         mt = mimetypes.guess_type(self.path)
         if mt:
@@ -51,6 +63,7 @@ class HttpHandler(BaseHTTPRequestHandler):
             self.wfile.write(file.read())
 
     def __GET_static(self):
+        """Serve a non-HTML static file, or return the 404 page."""
         static_path = self.__get_static_path()
         if static_path.exists() and not self.parsed_path.endswith(".html"):
             self.send_static()
@@ -58,6 +71,7 @@ class HttpHandler(BaseHTTPRequestHandler):
             self.send_html_file("error.html", 404)
 
     def __GET_routes(self):
+        """Dispatch a GET path to a page or a static file."""
         match self.parsed_path:
             case "/":
                 self.send_html_file("index.html")
@@ -69,6 +83,7 @@ class HttpHandler(BaseHTTPRequestHandler):
                 self.__GET_static()
 
     def __POST_routes(self):
+        """Dispatch a POST path to the message handler or the 404 page."""
         match self.parsed_path:
             case "/message":
                 self.__message_POST()
@@ -76,6 +91,10 @@ class HttpHandler(BaseHTTPRequestHandler):
                 self.send_html_file("error.html", 404)
 
     def __message_POST(self):
+        """Parse the message form, forward it over UDP, and redirect home.
+
+        An empty username or message is answered with the 400 page.
+        """
         data = self.rfile.read(int(self.headers["Content-Length"]))
         data_parse = urllib.parse.unquote_plus(data.decode())
         data_dict = {
@@ -94,13 +113,19 @@ class HttpHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def __parse_path(self):
+        """Store the request path without the query string."""
         self.parsed_path = urllib.parse.urlparse(self.path).path
 
     def __get_static_path(self):
+        """Return the public-directory path that matches the request path.
+
+        :return: filesystem path of the requested static file
+        """
         return PUBLIC_PATH.joinpath(self.parsed_path[1:])
 
 
 def end_socket_server():
+    """Ask the socket server to stop when this process controls it."""
     if not os.environ.get("CONTROL_SOCKET_SERVER"):
         return
 
@@ -113,6 +138,11 @@ def end_socket_server():
 
 
 def run(server_class=HTTPServer, handler_class=HttpHandler):
+    """Start the HTTP server and stop the socket server on shutdown.
+
+    :param server_class: HTTP server class to instantiate
+    :param handler_class: request handler class to bind to the server
+    """
     server_address = (
         os.environ.get("HTTP_SERVER_HOST", ""),
         int(os.environ.get("HTTP_SERVER_PORT", "3000")),

@@ -50,10 +50,11 @@ def error_decorator(func):
 
 @error_decorator
 def create_message(db: Database, data: dict[str, Any]):
-    """Insert randomly generated cat documents into the cats collection.
+    """Insert a chat message into the messages collection.
 
-    :param db: MongoDB database that contains the cats collection
-    :param num: number of cat documents to create
+    :param db: MongoDB database that contains the messages collection
+    :param data: form payload with ``username`` and ``message`` keys
+    :return: inserted document id, or ``None`` when the write fails
     """
 
     username, message = data.get("username", None), data.get("message", None)
@@ -74,6 +75,11 @@ def create_message(db: Database, data: dict[str, Any]):
 
 @error_decorator
 def print_found_message(db: Database, id):
+    """Log the stored message after a short delay.
+
+    :param db: MongoDB database that contains the messages collection
+    :param id: ``_id`` of the document to read back
+    """
     time.sleep(5)
     logger.info(
         "The message in remote host: %s for id = %s",
@@ -83,6 +89,14 @@ def print_found_message(db: Database, id):
 
 
 def run_server(ip, port):
+    """Listen for UDP messages and store them in MongoDB.
+
+    A payload of ``END`` stops the server. Keyboard interrupt closes the socket
+    and waits for read-back threads to finish.
+
+    :param ip: address to bind
+    :param port: UDP port to bind
+    """
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server = ip, port
     logger.info("Starting server. Host: %s on socket %d", ip, port)

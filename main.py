@@ -7,6 +7,7 @@ from src.socket_server import run_server
 
 
 def main():
+    """Start the HTTP server in the current process."""
     run()
 
 
