@@ -5,10 +5,13 @@ from pymongo.server_api import ServerApi
 
 
 def create_mongo_connection():
-    """Create a MongoDB client and return the cats database.
+    """Create a MongoDB client and return the messages database.
 
     Credentials are read from MONGODB_USER, MONGODB_PASSWORD, MONGODB_HOST,
-    and MONGODB_APPNAME.
+    and MONGODB_APPNAME. MONGODB_NOSERV selects a direct host connection
+    instead of a ``mongodb+srv`` URI. MONGODB_PORT is used for that host.
+
+    :return: database that stores chat messages
     """
     port = os.environ.get("MONGODB_PORT")
     app_name = os.environ.get("MONGODB_APPNAME")

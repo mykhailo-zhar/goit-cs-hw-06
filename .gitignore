@@ -219,3 +219,4 @@ __marimo__/
 
 # Mise
 *.local.toml
+.env
