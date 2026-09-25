@@ -81,6 +81,12 @@ class HttpHandler(BaseHTTPRequestHandler):
         data_dict = {
             key: value for key, value in [el.split("=") for el in data_parse.split("&")]
         }
+        if not data_dict.get("message") or not data_dict.get("username"):
+            self.log_message(
+                "Cannot send message, one of the fields is empty: %s", data_dict
+            )
+            self.send_html_file("error400.html", 400)
+            return
         self.log_message("Sending data: %s", data_dict)
         self.send_through_socket(json.dumps(data_dict).encode())
         self.send_response(302)
