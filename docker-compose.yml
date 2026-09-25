@@ -45,5 +45,6 @@ services:
       - "5000:5000"
     depends_on:
       - http
+      - mongodb
 volumes:
   data:
