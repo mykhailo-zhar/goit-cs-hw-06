@@ -1,0 +1,49 @@
+networks:
+  internal:
+    internal: true
+  public:
+
+services:
+  http:
+    build: .
+    networks:
+      - public
+      - internal
+    ports:
+      - "3000:3000"
+    environment:
+      HTTP_SERVER_PORT: 3000
+      SOCKET_MESSAGE_HOST: socket
+      SOCKET_MESSAGE_PORT: 5000
+      CONTROL_SOCKET_SERVER: true
+  mongodb:
+    image: mongodb/mongodb-atlas-local
+    environment: 
+      MONGODB_INITDB_ROOT_USERNAME: ${MONGODB_USER}
+      MONGODB_INITDB_ROOT_PASSWORD: ${MONGODB_PASSWORD}
+    ports:
+      - 27017:27017
+    networks:
+      - internal
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - data:/data
+  socket:
+    build: .
+    command: uv run src/socket_server.py
+    networks:
+      - internal
+    environment:
+      SOCKET_MESSAGE_HOST: '0.0.0.0'
+      SOCKET_MESSAGE_PORT: 5000
+      MONGODB_NOSERV: true
+      MONGODB_USER: ${MONGODB_USER}
+      MONGODB_PASSWORD: ${MONGODB_PASSWORD}
+      MONGODB_HOST: mongodb
+      MONGODB_PORT: 27017
+    ports:
+      - "5000:5000"
+    depends_on:
+      - http
+volumes:
+  data:
