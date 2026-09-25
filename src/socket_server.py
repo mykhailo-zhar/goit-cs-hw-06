@@ -120,7 +120,7 @@ if __name__ == "__main__":
     handler = logging.StreamHandler()
     handler.setLevel(logging.INFO)
 
-    formatter = logging.Formatter("%(levelname)s\t\t%(name)s\t\t%(message)s")
+    formatter = logging.Formatter("%(levelname)s\t%(name)s\t%(message)s")
     handler.setFormatter(formatter)
 
     logger.addHandler(handler)
