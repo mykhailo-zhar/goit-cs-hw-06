@@ -16,7 +16,7 @@ def create_mongo_connection():
     port = os.environ.get("MONGODB_PORT")
     app_name = os.environ.get("MONGODB_APPNAME")
 
-    db = f"appName={app_name}" if app_name else ""
+    db = f"appName={app_name}&" if app_name else ""
 
     if not os.environ.get("MONGODB_NOSERV"):
         connection_string = "mongodb+srv://{username}:{password}@{host}?{db}retryWrites=true&w=majority".format(
